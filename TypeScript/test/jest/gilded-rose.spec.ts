@@ -126,3 +126,43 @@ describe('Backstage passes to a TAFKAL80ETC concert', () => {
     expect(items[0].sellIn).toBeLessThan(initialSellIn);
   });
 })
+
+describe('Conjured Items', () => {
+  it('should not have negative quality', () => {
+    const gildedRose = new GildedRose([new Item('Conjured Mana Cake', 0, 0)]);
+    const items = gildedRose.updateQuality();
+    expect(items[0].quality).toBeGreaterThanOrEqual(0);
+  });
+  
+  it('should have quality less than 50', () => {
+    const gildedRose = new GildedRose([new Item('Conjured Mana Cake', 0, 50)]);
+    const items = gildedRose.updateQuality();
+    expect(items[0].quality).toBeLessThanOrEqual(50);
+  });
+
+  it('should have decreased sell in', () => {
+    const initialSellIn = 10;
+    const gildedRose = new GildedRose([new Item('Conjured Mana Cake', initialSellIn, 0)]);
+    const items = gildedRose.updateQuality();
+    expect(items[0].sellIn).toBeLessThan(initialSellIn);
+  });
+
+  it('should degrade in quality twice as fast as normal items (before sell by date)', () => {
+    const initialQuality = 5;
+    const gildedRose = new GildedRose([new Item('Conjured Mana Cake', 4, initialQuality)]);
+    const gildedRoseNormal = new GildedRose([new Item('Normal Item', 4, initialQuality)]);
+    const items = gildedRose.updateQuality();
+    const itemsNormal = gildedRoseNormal.updateQuality();
+    expect(items[0].quality).toBe(initialQuality - (2 * (initialQuality - itemsNormal[0].quality)));
+  });
+
+  it('should degrade in quality twice as fast as normal items (after sell by date)', () => {
+    const initialQuality = 5;
+    const gildedRose = new GildedRose([new Item('Conjured Mana Cake', 0, initialQuality)]);
+    const gildedRoseNormal = new GildedRose([new Item('Normal Item', 0, initialQuality)]);
+    const items = gildedRose.updateQuality();
+    const itemsNormal = gildedRoseNormal.updateQuality();
+    expect(items[0].quality).toBe(initialQuality - (2 * (initialQuality - itemsNormal[0].quality)));
+  });
+
+})
